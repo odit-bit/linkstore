@@ -30,10 +30,12 @@ func main() {
 	grpcServer := grpc.NewServer()
 	api.RegisterLinkGraphServer(grpcServer, linkServer)
 
-	listen, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", 8989))
+	listen, err := net.Listen("tcp", ":8181")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println("listen on :", listen.Addr().String())
 
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
