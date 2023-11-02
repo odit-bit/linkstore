@@ -2,14 +2,69 @@ package linkstore
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"net"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
 	"github.com/odit-bit/linkstore/api"
 	"github.com/odit-bit/linkstore/linkgraph"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+type Server struct {
+	Port    int
+	Handler linkgraph.Graph
+}
+
+func (srv *Server) ListenAndServe() error {
+	linkServer := NewServer(srv.Handler)
+
+	grpcServer := grpc.NewServer()
+	api.RegisterLinkGraphServer(grpcServer, linkServer)
+
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", srv.Port))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("listen on :", listen.Addr().String())
+
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	sigC := make(chan os.Signal, 1)
+	signal.Notify(sigC, syscall.SIGINT, syscall.SIGTERM)
+
+	var wg sync.WaitGroup
+	//server setup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		grpcServer.Serve(listen)
+
+	}()
+
+	select {
+	case <-ctx.Done():
+	case <-sigC:
+		cancel()
+	}
+
+	grpcServer.GracefulStop()
+
+	wg.Wait()
+	return nil
+}
+
+//================
 
 var _ api.LinkGraphServer = (*ApiServer)(nil)
 

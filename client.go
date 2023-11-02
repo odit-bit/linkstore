@@ -9,8 +9,18 @@ import (
 	"github.com/odit-bit/linkstore/api"
 	"github.com/odit-bit/linkstore/linkgraph"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+func ConnectGraph(addr string) (*apiClient, error) {
+	graphConn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+
+	return NewClient(context.TODO(), graphConn)
+}
 
 var _ linkgraph.Graph = (*apiClient)(nil)
 
