@@ -1,4 +1,4 @@
-package postgregraph
+package linkpostgre
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/odit-bit/linkstore/linkgraph"
 )
@@ -465,55 +464,3 @@ func partitionRange(t *testing.T, partition, numPartition int) (from, to uuid.UU
 	return from, to
 
 }
-
-// func testEdgeIteration(pg *postgre, edges []*graph.Edge) func(t *testing.T) {
-// 	return func(t *testing.T) {
-
-// 		for i, edge := range edges {
-// 			err := pg.UpsertEdge(edge)
-// 			if err != nil {
-// 				t.Fatalf(err.Error())
-// 			}
-// 			if edges[i].ID == uuid.Nil {
-// 				t.Errorf("\nedge: %v", edges[i].ID)
-// 			}
-// 		}
-
-// 		//test edges iterator
-// 		edgeCursor, err := pg.Edges(xuuid.MIN, xuuid.MAX, time.Now())
-// 		if err != nil {
-// 			t.Fatal(err)
-// 		}
-// 		count := 0
-// 		result := []*graph.Edge{}
-// 		for {
-// 			ok := edgeCursor.Next()
-// 			if !ok {
-// 				err := edgeCursor.Error()
-// 				if err != nil {
-// 					t.Fatal(err)
-// 				}
-// 				break
-// 			}
-
-// 			act := edgeCursor.Edge()
-// 			result = append(result, act)
-// 			count++
-// 		}
-// 		edgeCursor.Close()
-
-// 		sort.Slice(edges, func(l, r int) bool { return edges[l].ID.String() < edges[r].ID.String() })
-// 		sort.Slice(result, func(l, r int) bool { return result[l].ID.String() < result[r].ID.String() })
-// 		for i, res := range result {
-// 			if res.ID.String() != edges[i].ID.String() {
-// 				t.Fatalf("\n%v\n%v\n", res.ID.String(), edges[i].ID.String())
-// 			}
-// 		}
-
-// 		if count <= 0 {
-// 			t.Log("edge iterator not run")
-// 			t.FailNow()
-// 		}
-
-// 	}
-// }

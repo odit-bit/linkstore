@@ -14,7 +14,8 @@ RUN go mod download
 # make static image
 ENV CGO_ENABLED=0
 ENV GOOS=linux
-RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o /rpcServer ./server/main.go
+ENV GOARCH=amd64
+RUN go build -o /graph-server ./app/main.go
 
 
 ########################################################
@@ -25,9 +26,9 @@ FROM gcr.io/distroless/base-debian11 AS build-release-stage
 WORKDIR /
 
 COPY --from=build-stage /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build-stage /rpcServer /rpcServer
+COPY --from=build-stage /graph-server /graph-server
 
-EXPOSE 8080
+# EXPOSE 8080
 
-ENTRYPOINT [ "./rpcServer" ]
+ENTRYPOINT [ "./graph-server" ]
 # CMD [ "./monolith" ]

@@ -12,14 +12,14 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/odit-bit/linkstore/api"
 	"github.com/odit-bit/linkstore/linkgraph"
-	postgregraph "github.com/odit-bit/linkstore/postgre"
+	"github.com/odit-bit/linkstore/linkpostgre"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func Test_server(t *testing.T) {
 
-	db := postgregraph.New(connectPG())
+	db := linkpostgre.New(connectPG())
 	linkServer := NewServer(db)
 
 	grpcServer := grpc.NewServer()
