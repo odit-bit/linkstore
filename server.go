@@ -66,15 +66,16 @@ func (srv *Server) ListenAndServe() error {
 
 //================
 
-var _ api.LinkGraphServer = (*ApiServer)(nil)
+var _ api.LinkGraphServer = (*GraphServer)(nil)
 
-type ApiServer struct {
+type GraphServer struct {
 	api.UnimplementedLinkGraphServer
 	g linkgraph.Graph
 }
 
-func NewServer(graph linkgraph.Graph) *ApiServer {
-	srv := ApiServer{
+func NewServer(graph linkgraph.Graph) *GraphServer {
+
+	srv := GraphServer{
 		UnimplementedLinkGraphServer: api.UnimplementedLinkGraphServer{},
 		g:                            graph,
 	}
@@ -82,7 +83,7 @@ func NewServer(graph linkgraph.Graph) *ApiServer {
 }
 
 // Edges implements api.LinkGraphServer.
-func (srv *ApiServer) Edges(idRange *api.Range, w api.LinkGraph_EdgesServer) error {
+func (srv *GraphServer) Edges(idRange *api.Range, w api.LinkGraph_EdgesServer) error {
 	updateBefore := idRange.Filter.AsTime()
 
 	from, err := uuid.FromBytes(idRange.FromUuid)
@@ -125,7 +126,7 @@ func (srv *ApiServer) Edges(idRange *api.Range, w api.LinkGraph_EdgesServer) err
 }
 
 // RemoveStaleEdges implements api.LinkGraphServer.
-func (srv *ApiServer) RemoveStaleEdges(ctx context.Context, req *api.RemoveStaleEdgesQuery) (*emptypb.Empty, error) {
+func (srv *GraphServer) RemoveStaleEdges(ctx context.Context, req *api.RemoveStaleEdgesQuery) (*emptypb.Empty, error) {
 	updatedBefore := req.UpdatedBefore.AsTime() //ptypes.Timestamp(req.UpdatedBefore)
 
 	err := srv.g.RemoveStaleEdges(
@@ -137,7 +138,7 @@ func (srv *ApiServer) RemoveStaleEdges(ctx context.Context, req *api.RemoveStale
 }
 
 // UpsertEdge implements api.LinkGraphServer.
-func (srv *ApiServer) UpsertEdge(ctx context.Context, req *api.Edge) (*api.Edge, error) {
+func (srv *GraphServer) UpsertEdge(ctx context.Context, req *api.Edge) (*api.Edge, error) {
 	edge := linkgraph.Edge{
 		ID:  uuidFromBytes(req.Uuid),
 		Src: uuidFromBytes(req.SrcUuid),
@@ -156,7 +157,7 @@ func (srv *ApiServer) UpsertEdge(ctx context.Context, req *api.Edge) (*api.Edge,
 }
 
 // UpsertLink implements api.LinkGraphServer.
-func (srv *ApiServer) UpsertLink(ctx context.Context, req *api.Link) (*api.Link, error) {
+func (srv *GraphServer) UpsertLink(ctx context.Context, req *api.Link) (*api.Link, error) {
 	var (
 		err  error
 		link = linkgraph.Link{
@@ -177,7 +178,7 @@ func (srv *ApiServer) UpsertLink(ctx context.Context, req *api.Link) (*api.Link,
 	return req, nil
 }
 
-func (srv *ApiServer) Links(idRange *api.Range, w api.LinkGraph_LinksServer) error {
+func (srv *GraphServer) Links(idRange *api.Range, w api.LinkGraph_LinksServer) error {
 	accessedBefore := idRange.Filter.AsTime()
 
 	from, err := uuid.FromBytes(idRange.FromUuid)

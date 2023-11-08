@@ -15,7 +15,7 @@ RUN go mod download
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOARCH=amd64
-RUN go build -o /graph-server ./app/main.go
+RUN go build -o /graph-server ./app/
 
 
 ########################################################
@@ -26,7 +26,7 @@ FROM gcr.io/distroless/base-debian11 AS build-release-stage
 WORKDIR /
 
 COPY --from=build-stage /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build-stage /graph-server /graph-server
+COPY --from=build-stage graph-server graph-server
 
 # EXPOSE 8080
 
